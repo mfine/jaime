@@ -30,3 +30,4 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: .//target/release/jaime
         asset_name: jaime
+        asset_content_type: application/octet-stream
