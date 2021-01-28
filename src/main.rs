@@ -4,25 +4,44 @@ use std::env;
 use teloxide::prelude::*;
 use teloxide::utils::command::BotCommand;
 
-#[derive(Deserialize)]
+#[derive(Deserialize,Debug)]
 struct Usd {
     rate: String,
 }
 
 #[allow(non_snake_case)]
-#[derive(Deserialize)]
+#[derive(Deserialize,Debug)]
 struct Bpi {
     USD: Usd,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize,Debug)]
 struct Btc {
     bpi: Bpi,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize,Debug)]
 struct Tweet {
     id_str: String,
+}
+
+#[allow(non_snake_case)]
+#[derive(Deserialize,Debug)]
+struct Item {
+    bid: f64,
+    ask: f64,
+    marketCap: f64,
+}
+
+#[derive(Deserialize,Debug)]
+struct Quotes {
+    result: Vec<Item>,
+}
+
+#[allow(non_snake_case)]
+#[derive(Deserialize,Debug)]
+struct Quote {
+    quoteResponse: Quotes,
 }
 
 #[derive(BotCommand)]
@@ -38,6 +57,12 @@ enum Command {
     Wsb,
     #[command(description = "return the latest tweet from a handle.")]
     Tweet(String),
+    #[command(description = "return the latest Tesla quote.")]
+    Tsla,
+    #[command(description = "return the latest GameStop quote.")]
+    Gme,
+    #[command(description = "return the latest quote from a stock.")]
+    Quote(String),
 }
 
 fn get_btc() -> Result<String, Error> {
@@ -54,6 +79,19 @@ fn get_tweet(handle: String) -> Result<String, Error> {
         .bearer_auth(bearer)
         .send()?.json()?;
     Ok(format!("https://twitter.com/{}/status/{}", handle, response[0].id_str))
+}
+
+fn get_quote(stock: String) -> Result<String, Error> {
+    let client = reqwest::blocking::Client::new();
+    let key = env::var("RAPIDAPI_KEY").unwrap();
+    let response: Quote = client
+        .get("https://apidojo-yahoo-finance-v1.p.rapidapi.com/market/v2/get-quotes")
+        .query(&[("region", "us"), ("symbols", &stock)])
+        .header("x-rapidapi-key", key)
+        .header("x-rapidapi-host", "apidojo-yahoo-finance-v1.p.rapidapi.com")
+        .header("useQueryString", "true")
+        .send()?.json()?;
+    Ok(format!("{} {} {} {}", stock, response.quoteResponse.result[0].bid, response.quoteResponse.result[0].ask, response.quoteResponse.result[0].marketCap))
 }
 
 async fn answer(cx: UpdateWithCx<Message>, command: Command) -> ResponseResult<()> {
@@ -74,6 +112,18 @@ async fn answer(cx: UpdateWithCx<Message>, command: Command) -> ResponseResult<(
             cx.answer(wsb).send().await?
         }
         Command::Tweet(handle) => {
+            let tweet = get_tweet(handle).unwrap();
+            cx.answer(tweet).send().await?
+        }
+        Command::Tsla => {
+            let tsla = get_quote("TSLA".to_string()).unwrap();
+            cx.answer(tsla).send().await?
+        }
+        Command::Gme => {
+            let gme = get_quote("GME".to_string()).unwrap();
+            cx.answer(gme).send().await?
+        }
+        Command::Quote(handle) => {
             let tweet = get_tweet(handle).unwrap();
             cx.answer(tweet).send().await?
         }
