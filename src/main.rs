@@ -34,6 +34,8 @@ enum Command {
     Btc,
     #[command(description = "return the latest Adrian Wojnarowski tweet.")]
     Woj,
+    #[command(description = "return the latest wallstreetbets moderators tweet.")]
+    Wsb,
     #[command(description = "return the latest tweet from a handle.")]
     Tweet(String),
 }
@@ -66,6 +68,10 @@ async fn answer(cx: UpdateWithCx<Message>, command: Command) -> ResponseResult<(
         Command::Woj => {
             let woj = get_tweet("wojespn".to_string()).unwrap();
             cx.answer(woj).send().await?
+        }
+        Command::Wsb => {
+            let wsb = get_tweet("wsbmod".to_string()).unwrap();
+            cx.answer(wsb).send().await?
         }
         Command::Tweet(handle) => {
             let tweet = get_tweet(handle).unwrap();
