@@ -124,7 +124,7 @@ async fn answer(cx: UpdateWithCx<Message>, command: Command) -> ResponseResult<(
             cx.answer(gme).send().await?
         }
         Command::Quote(handle) => {
-            let tweet = get_tweet(handle).unwrap();
+            let tweet = get_quote(handle).unwrap();
             cx.answer(tweet).send().await?
         }
     };
