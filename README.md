@@ -1,3 +1,1 @@
-# jaime
-
-`jaime` is a Telegram Bot.
+Jaime is a Telegram Bot.
