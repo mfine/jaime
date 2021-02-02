@@ -100,32 +100,46 @@ async fn answer(cx: UpdateWithCx<Message>, command: Command) -> ResponseResult<(
             cx.answer(Command::descriptions()).send().await?
         }
         Command::Btc => {
-            let btc = get_btc().unwrap();
-            cx.answer(btc).send().await?
+            match get_btc() {
+                Ok(btc) => cx.answer(btc).send().await?,
+                _ => cx.answer("https://bit.ly/2Yzl1GH").send().await?,
+            }
         }
         Command::Woj => {
-            let woj = get_tweet("wojespn".to_string()).unwrap();
-            cx.answer(woj).send().await?
+            match get_tweet("wojespn".to_string()) {
+                Ok(woj) => cx.answer(woj).send().await?,
+                _ => cx.answer("https://bit.ly/2Yzl1GH").send().await?,
+            }
         }
         Command::Wsb => {
-            let wsb = get_tweet("wsbmod".to_string()).unwrap();
-            cx.answer(wsb).send().await?
+            match get_tweet("wsbmod".to_string()) {
+                Ok(wsb) => cx.answer(wsb).send().await?,
+                _ => cx.answer("https://bit.ly/2Yzl1GH").send().await?,
+            }
         }
         Command::Tweet(handle) => {
-            let tweet = get_tweet(handle).unwrap();
-            cx.answer(tweet).send().await?
+            match get_tweet(handle) {
+                Ok(tweet) => cx.answer(tweet).send().await?,
+                _ => cx.answer("https://bit.ly/2Yzl1GH").send().await?,
+            }
         }
         Command::Tsla => {
-            let tsla = get_quote("TSLA".to_string()).unwrap();
-            cx.answer(tsla).send().await?
+            match get_quote("TSLA".to_string()) {
+                Ok(tsla) => cx.answer(tsla).send().await?,
+                _ => cx.answer("https://bit.ly/2Yzl1GH").send().await?,
+            }
         }
         Command::Gme => {
-            let gme = get_quote("GME".to_string()).unwrap();
-            cx.answer(gme).send().await?
+            match get_quote("GME".to_string()) {
+                Ok(gme) => cx.answer(gme).send().await?,
+                _ => cx.answer("https://bit.ly/2Yzl1GH").send().await?,
+            }
         }
         Command::Quote(handle) => {
-            let tweet = get_quote(handle).unwrap();
-            cx.answer(tweet).send().await?
+            match get_quote(handle) {
+                Ok(quote) => cx.answer(quote).send().await?,
+                _ => cx.answer("https://bit.ly/2Yzl1GH").send().await?,
+            }
         }
     };
 
