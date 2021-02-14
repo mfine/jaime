@@ -78,7 +78,11 @@ fn get_tweet(handle: String) -> Result<String, Error> {
         .query(&[("count", "1"), ("screen_name", &handle)])
         .bearer_auth(bearer)
         .send()?.json()?;
-    Ok(format!("https://twitter.com/{}/status/{}", handle, response[0].id_str))
+    if response.len() > 0 {
+        Ok(format!("https://twitter.com/{}/status/{}", handle, response[0].id_str))
+    } else {
+        Ok("https://bit.ly/2Yzl1GH".to_string())
+    }
 }
 
 fn get_quote(stock: String) -> Result<String, Error> {
