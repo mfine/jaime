@@ -59,6 +59,12 @@ struct Prices {
     data: Data,
 }
 
+#[allow(non_snake_case)]
+#[derive(Deserialize,Debug)]
+struct Comp {
+    USD: String,
+}
+
 #[derive(BotCommand)]
 #[command(rename = "lowercase", description = "These commands are supported:")]
 enum Command {
@@ -68,6 +74,8 @@ enum Command {
     Btc,
     #[command(description = "return the latest Doge price.")]
     Doge,
+    #[command(description = "return the latest Ethereum price.")]
+    Eth,
     #[command(description = "return the latest Adrian Wojnarowski tweet.")]
     Woj,
     #[command(description = "return the latest wallstreetbets moderators tweet.")]
@@ -97,6 +105,15 @@ fn get_doge() -> Result<String, Error> {
     } else {
         Ok("https://bit.ly/2Yzl1GH".to_string())
     }
+}
+
+fn get_eth() -> Result<String, Error> {
+    let client = reqwest::blocking::Client::new();
+    let response: Comp = client
+        .get("https://min-api.cryptocompare.com/data/price")
+        .query(&[("fsym", "ETH"), ("tsyms", "USD")])
+        .send()?.json()?;
+    Ok(response.USD)
 }
 
 fn get_tweet(handle: String) -> Result<String, Error> {
@@ -141,6 +158,12 @@ async fn answer(cx: UpdateWithCx<Message>, command: Command) -> ResponseResult<(
         Command::Doge => {
             match get_doge() {
                 Ok(doge) => cx.answer(doge).send().await?,
+                _ => cx.answer("https://bit.ly/2Yzl1GH").send().await?,
+            }
+        }
+        Command::Eth => {
+            match get_eth() {
+                Ok(eth) => cx.answer(eth).send().await?,
                 _ => cx.answer("https://bit.ly/2Yzl1GH").send().await?,
             }
         }
