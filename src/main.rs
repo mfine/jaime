@@ -62,7 +62,7 @@ struct Prices {
 #[allow(non_snake_case)]
 #[derive(Deserialize,Debug)]
 struct Comp {
-    USD: String,
+    USD: f64,
 }
 
 #[derive(BotCommand)]
@@ -113,7 +113,7 @@ fn get_eth() -> Result<String, Error> {
         .get("https://min-api.cryptocompare.com/data/price")
         .query(&[("fsym", "ETH"), ("tsyms", "USD")])
         .send()?.json()?;
-    Ok(response.USD)
+    Ok(response.USD.to_string())
 }
 
 fn get_tweet(handle: String) -> Result<String, Error> {
