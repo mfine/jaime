@@ -44,6 +44,21 @@ struct Quote {
     quoteResponse: Quotes,
 }
 
+#[derive(Deserialize,Debug)]
+struct Price {
+    price: String,
+}
+
+#[derive(Deserialize,Debug)]
+struct Data {
+    prices: Vec<Price>,
+}
+
+#[derive(Deserialize,Debug)]
+struct Prices {
+    data: Data,
+}
+
 #[derive(BotCommand)]
 #[command(rename = "lowercase", description = "These commands are supported:")]
 enum Command {
@@ -51,6 +66,8 @@ enum Command {
     Help,
     #[command(description = "return the latest Bitcoin price.")]
     Btc,
+    #[command(description = "return the latest Doge price.")]
+    Doge,
     #[command(description = "return the latest Adrian Wojnarowski tweet.")]
     Woj,
     #[command(description = "return the latest wallstreetbets moderators tweet.")]
@@ -68,6 +85,18 @@ enum Command {
 fn get_btc() -> Result<String, Error> {
     let response: Btc = reqwest::blocking::get("https://api.coindesk.com/v1/bpi/currentprice.json")?.json()?;
     Ok(response.bpi.USD.rate)
+}
+
+fn get_doge() -> Result<String, Error> {
+    let client = reqwest::blocking::Client::new();
+    let response: Prices = client
+        .get("https://sochain.com/api/v2/get_price/DOGE/USD")
+        .send()?.json()?;
+    if response.data.prices.len() > 0 {
+        Ok(response.data.prices[0].price.to_string())
+    } else {
+        Ok("https://bit.ly/2Yzl1GH".to_string())
+    }
 }
 
 fn get_tweet(handle: String) -> Result<String, Error> {
@@ -106,6 +135,12 @@ async fn answer(cx: UpdateWithCx<Message>, command: Command) -> ResponseResult<(
         Command::Btc => {
             match get_btc() {
                 Ok(btc) => cx.answer(btc).send().await?,
+                _ => cx.answer("https://bit.ly/2Yzl1GH").send().await?,
+            }
+        }
+        Command::Doge => {
+            match get_doge() {
+                Ok(doge) => cx.answer(doge).send().await?,
                 _ => cx.answer("https://bit.ly/2Yzl1GH").send().await?,
             }
         }
