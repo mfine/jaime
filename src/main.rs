@@ -78,12 +78,16 @@ enum Command {
     Eth,
     #[command(description = "return the latest Adrian Wojnarowski tweet.")]
     Woj,
+    #[command(description = "return the latest Shams Charania tweet.")]
+    Shams,
     #[command(description = "return the latest wallstreetbets moderators tweet.")]
     Wsb,
     #[command(description = "return the latest tweet from a handle.")]
     Tweet(String),
     #[command(description = "return the latest Tesla quote.")]
     Tsla,
+    #[command(description = "return the latest Coinbase quote.")]
+    Coin,
     #[command(description = "return the latest GameStop quote.")]
     Gme,
     #[command(description = "return the latest quote from a stock.")]
@@ -173,6 +177,12 @@ async fn answer(cx: UpdateWithCx<Message>, command: Command) -> ResponseResult<(
                 _ => cx.answer("https://bit.ly/2Yzl1GH").send().await?,
             }
         }
+        Command::Shams => {
+            match get_tweet("shamscharania".to_string()) {
+                Ok(shams) => cx.answer(shams).send().await?,
+                _ => cx.answer("https://bit.ly/2Yzl1GH").send().await?,
+            }
+        }
         Command::Wsb => {
             match get_tweet("wsbmod".to_string()) {
                 Ok(wsb) => cx.answer(wsb).send().await?,
@@ -188,6 +198,12 @@ async fn answer(cx: UpdateWithCx<Message>, command: Command) -> ResponseResult<(
         Command::Tsla => {
             match get_quote("TSLA".to_string()) {
                 Ok(tsla) => cx.answer(tsla).send().await?,
+                _ => cx.answer("https://bit.ly/2Yzl1GH").send().await?,
+            }
+        }
+        Command::Coin => {
+            match get_quote("COIN".to_string()) {
+                Ok(coin) => cx.answer(coin).send().await?,
                 _ => cx.answer("https://bit.ly/2Yzl1GH").send().await?,
             }
         }
